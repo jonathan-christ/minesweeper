@@ -7,5 +7,5 @@ export type TileProps = {
 	oncontextmenu?: () => void;
 };
 
-export type GameState = "win" | "lose" | "playing";
+export type GameState = "win" | "lose" | "playing" | "start";
 export type Difficulty = "easy" | "medium" | "hard";
