@@ -29,7 +29,6 @@ export class GameController {
         return this.height;
     }
 
-
     public getState() {
         return this.state;
     }
@@ -103,16 +102,26 @@ export class GameController {
         let avoidTiles: { x: number, y: number }[] = [];
         let value: TileProps[][];
         this.tiles.subscribe(v => value = v)();
-        for (let i = 0; i < this.totalMines; i++) {
+
+        for (let i = -1; i <= 1; i++) {
+            for (let j = -1; j <= 1; j++) {
+                if (i === 0 && j === 0) continue;
+                avoidTiles.push({ x: x_start + i, y: y_start + j });
+            }
+        }
+
+        for (let i = 0, shouldAvoid = false, isExisting = false; i < this.totalMines; i++) {
             const x = Math.floor(Math.random() * this.width);
             const y = Math.floor(Math.random() * this.height);
-            
-            if (mineCoords.some(coord => coord.x === x && coord.y === y)) {
+
+            shouldAvoid = avoidTiles.some(coord => coord.x === x && coord.y === y);
+            isExisting = mineCoords.some(coord => coord.x === x && coord.y === y)
+            if (shouldAvoid || isExisting) {
                 i--;
                 continue;
             }
 
-            mineCoords.push({x, y});
+            mineCoords.push({ x, y });
             value![y][x].isMine = true;
         }
         this.tiles.set(value!);
@@ -160,7 +169,7 @@ export class GameController {
         }
 
         this.revealedNonMineTiles++;
-        if(this.revealedNonMineTiles === this.totalNonMineTiles) {
+        if (this.revealedNonMineTiles === this.totalNonMineTiles) {
             this.state = "win";
             alert("You win");
             return;
@@ -180,10 +189,10 @@ export class GameController {
         if (this.state !== "playing") return;
         let value: TileProps[][];
         this.tiles.subscribe(v => value = v)();
-        
+
         if (x < 0 || x >= this.width || y < 0 || y >= this.height) return;
         if (value![y][x].isRevealed) return;
-        
+
         value![y][x].isFlagged = !value![y][x].isFlagged;
         this.tiles.set(value!);
     }
