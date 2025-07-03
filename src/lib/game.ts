@@ -62,6 +62,10 @@ export class GameController {
         this.setupGame();
     }
 
+    public resetGame() {
+        this.setupGame();
+    }
+
     private setupGame() {
         const difficulty = DIFFICULTY_SETUP[this.difficulty];
         this.totalMines = difficulty.mines;
@@ -147,10 +151,6 @@ export class GameController {
         
         value![y][x].isFlagged = !value![y][x].isFlagged;
         this.tiles.set(value!);
-    }
-
-    public resetGame() {
-        this.setupGame();
     }
 
 }
