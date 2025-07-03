@@ -12,12 +12,19 @@ export class GameController {
     private revealedNonMineTiles: number = 0;
 
     private state: GameState = "start";
-    public tiles: Writable<TileProps[][]>;
     private difficulty: Difficulty;
+
+    public tiles: Writable<TileProps[][]>;
+    private tilesCache: TileProps[][] = [];
 
     constructor(difficulty: Difficulty = "easy") {
         this.difficulty = difficulty;
         this.tiles = writable([]);
+
+        this.tiles.subscribe(tiles => {
+            this.tilesCache = tiles;
+        });
+
         this.setupGame();
     }
 
@@ -53,9 +60,7 @@ export class GameController {
 
     public getTile(x: number, y: number): TileProps | undefined {
         if (x < 0 || x >= this.width || y < 0 || y >= this.height) return undefined;
-        let value: TileProps[][];
-        this.tiles.subscribe(v => value = v)();
-        return value![y][x];
+        return this.tilesCache[y]?.[x];
     }
 
     public setDifficulty(difficulty: Difficulty) {
@@ -74,6 +79,7 @@ export class GameController {
         this.width = difficulty.width;
         this.height = difficulty.height;
         this.state = "start";
+        this.revealedNonMineTiles = 0;
 
         this.generateTiles();
     }
@@ -99,90 +105,127 @@ export class GameController {
     }
 
     private generateMines(x_start: number, y_start: number) {
-        let mineCoords: { x: number, y: number }[] = [];
-        let avoidTiles: { x: number, y: number }[] = [];
-        let value: TileProps[][];
-        this.tiles.subscribe(v => value = v)();
+        const mineCoords = new Set<string>();
+        const avoidTiles = new Set<string>();
 
         for (let i = -1; i <= 1; i++) {
             for (let j = -1; j <= 1; j++) {
-                if (i === 0 && j === 0) continue;
-                avoidTiles.push({ x: x_start + j, y: y_start + i });
+                const x = x_start + j;
+                const y = y_start + i;
+                if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
+                    avoidTiles.add(`${x},${y}`);
+                }
             }
         }
 
-        for (let i = 0; i < this.totalMines; i++) {
+        // Generate mines
+        while (mineCoords.size < this.totalMines) {
             const x = Math.floor(Math.random() * this.width);
             const y = Math.floor(Math.random() * this.height);
+            const coordKey = `${x},${y}`;
 
-            const shouldAvoid = avoidTiles.some(coord => coord.x === x && coord.y === y);
-            const isExisting = mineCoords.some(coord => coord.x === x && coord.y === y)
-            if (shouldAvoid || isExisting) {
-                i--;
-                continue;
+            if (!avoidTiles.has(coordKey) && !mineCoords.has(coordKey)) {
+                mineCoords.add(coordKey);
+                this.tilesCache[y][x].isMine = true;
             }
-
-            mineCoords.push({ x, y });
-            value![y][x].isMine = true;
         }
-        this.tiles.set(value!);
+
+        this.tiles.set(this.tilesCache);
     }
 
     private calculateMineCount() {
-        let value: TileProps[][];
-        this.tiles.subscribe(v => value = v)();
-        const searchAround = (x: number, y: number) => {
-            let count = 0;
-            for (let i = -1; i <= 1; i++) {
-                for (let j = -1; j <= 1; j++) {
-                    if (i === 0 && j === 0) continue;
-                    if (x + i < 0 || x + i >= this.width || y + j < 0 || y + j >= this.height) continue;
-                    if (value![y + j][x + i].isMine) count++;
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                if (this.tilesCache[y][x].isMine) continue;
+                let count = 0;
+
+                // Check surrounding tiles
+                for (let dy = -1; dy <= 1; dy++) {
+                    for (let dx = -1; dx <= 1; dx++) {
+                        if (dx === 0 && dy === 0) continue;
+
+                        const nx = x + dx;
+                        const ny = y + dy;
+
+                        if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
+                            if (this.tilesCache[ny][nx].isMine) count++;
+                        }
+                    }
                 }
-            }
-            return count;
-        }
-        for (let i = 0; i < this.height; i++) {
-            for (let j = 0; j < this.width; j++) {
-                if (value![i][j].isMine) continue;
-                value![i][j].mineCount = searchAround(j, i);
+                this.tilesCache[y][x].mineCount = count;
             }
         }
-        this.tiles.set(value!);
+
+        this.tiles.set(this.tilesCache);
     }
 
     public revealTile(x: number, y: number) {
         if (this.state === "start") this.fillBoard(x, y);
         if (this.state !== "playing") return;
-        console.log("clicked", x, y);
 
-        let value: TileProps[][];
-        this.tiles.subscribe(v => value = v)();
+        const toReveal = new Set<string>();
+        const visited = new Set<string>();
 
-        if (x < 0 || x >= this.width || y < 0 || y >= this.height) return;
-        if (value![y][x].isRevealed || value![y][x].isFlagged) return;
+        this.floodFillReveal(x, y, toReveal, visited);
 
-        value![y][x].isRevealed = true;
-        this.tiles.set(value!);
+        if (toReveal.size === 0) return;
 
-        if (value![y][x].isMine) {
+        let hitMine = false;
+        let newlyRevealed = 0;
+
+        for (const coordKey of toReveal) {
+            const [tileX, tileY] = coordKey.split(',').map(Number);
+            const tile = this.tilesCache[tileY][tileX];
+
+            if (!tile.isRevealed && !tile.isFlagged) {
+                tile.isRevealed = true;
+
+                if (tile.isMine) {
+                    hitMine = true;
+                } else {
+                    newlyRevealed++;
+                }
+            }
+        }
+
+        this.revealedNonMineTiles += newlyRevealed;
+
+        // Update store once with all changes
+        this.tiles.set(this.tilesCache);
+
+        // Check game end conditions
+        if (hitMine) {
             this.state = "lose";
             alert("You lose");
             return;
         }
 
-        this.revealedNonMineTiles++;
         if (this.revealedNonMineTiles === this.totalNonMineTiles) {
             this.state = "win";
             alert("You win");
             return;
         }
+    }
 
-        // Reveal all tiles around if tile has no mine count
-        if (value![y][x].mineCount === 0) {
-            for (let i = -1; i <= 1; i++) {
-                for (let j = -1; j <= 1; j++) {
-                    this.revealTile(x + i, y + j);
+    private floodFillReveal(x: number, y: number, toReveal: Set<string>, visited: Set<string>) {
+        // Check bounds
+        if (x < 0 || x >= this.width || y < 0 || y >= this.height) return;
+        
+        const coordKey = `${x},${y}`;
+        if (visited.has(coordKey)) return;
+        visited.add(coordKey);
+        
+        const tile = this.tilesCache[y][x];
+        if (tile.isRevealed || tile.isFlagged) return;
+        
+        toReveal.add(coordKey);
+        
+        // If this tile has no adjacent mines, continue flood fill
+        if (!tile.isMine && tile.mineCount === 0) {
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    if (dx === 0 && dy === 0) continue;
+                    this.floodFillReveal(x + dx, y + dy, toReveal, visited);
                 }
             }
         }
@@ -190,14 +233,14 @@ export class GameController {
 
     public flagTile(x: number, y: number) {
         if (this.state !== "playing") return;
-        let value: TileProps[][];
-        this.tiles.subscribe(v => value = v)();
-
         if (x < 0 || x >= this.width || y < 0 || y >= this.height) return;
-        if (value![y][x].isRevealed) return;
 
-        value![y][x].isFlagged = !value![y][x].isFlagged;
-        this.tiles.set(value!);
+        const tile = this.tilesCache[y][x];
+        if (tile.isRevealed) return;
+        
+        tile.isFlagged = !tile.isFlagged;
+        
+        this.tiles.set(this.tilesCache);
     }
 
 }
