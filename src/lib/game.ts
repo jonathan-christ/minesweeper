@@ -195,8 +195,7 @@ export class GameController {
 
         // Check game end conditions
         if (hitMine) {
-            this.state = "lose";
-            alert("You lose");
+            this.loseGame();
             return;
         }
 
@@ -240,6 +239,21 @@ export class GameController {
         
         tile.isFlagged = !tile.isFlagged;
         
+        this.tiles.set(this.tilesCache);
+    }
+
+    private loseGame() {
+        this.state = "lose";
+        alert("You lose");
+        for(let y = 0; y < this.height; y++) {
+            for(let x = 0; x < this.width; x++) {
+                const tile = this.tilesCache[y][x];
+                if(tile.isMine) {
+                    tile.isRevealed = true;
+                }
+            }
+        }
+
         this.tiles.set(this.tilesCache);
     }
 
