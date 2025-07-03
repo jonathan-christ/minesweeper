@@ -138,6 +138,16 @@ export class GameController {
 
         if (value![y][x].isMine) {
             this.state = "lose";
+            return;
+        }
+
+        // Reveal all tiles around if tile has no mine count
+        if (value![y][x].mineCount === 0) {
+            for (let i = -1; i <= 1; i++) {
+                for (let j = -1; j <= 1; j++) {
+                    this.revealTile(x + i, y + j);
+                }
+            }
         }
     }
 
