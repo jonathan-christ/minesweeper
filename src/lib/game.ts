@@ -73,6 +73,7 @@ export class GameController {
         this.totalNonMineTiles = difficulty.width * difficulty.height - difficulty.mines;
         this.width = difficulty.width;
         this.height = difficulty.height;
+        this.state = "start";
 
         this.generateTiles();
     }
@@ -106,16 +107,16 @@ export class GameController {
         for (let i = -1; i <= 1; i++) {
             for (let j = -1; j <= 1; j++) {
                 if (i === 0 && j === 0) continue;
-                avoidTiles.push({ x: x_start + i, y: y_start + j });
+                avoidTiles.push({ x: x_start + j, y: y_start + i });
             }
         }
 
-        for (let i = 0, shouldAvoid = false, isExisting = false; i < this.totalMines; i++) {
+        for (let i = 0; i < this.totalMines; i++) {
             const x = Math.floor(Math.random() * this.width);
             const y = Math.floor(Math.random() * this.height);
 
-            shouldAvoid = avoidTiles.some(coord => coord.x === x && coord.y === y);
-            isExisting = mineCoords.some(coord => coord.x === x && coord.y === y)
+            const shouldAvoid = avoidTiles.some(coord => coord.x === x && coord.y === y);
+            const isExisting = mineCoords.some(coord => coord.x === x && coord.y === y)
             if (shouldAvoid || isExisting) {
                 i--;
                 continue;
@@ -153,6 +154,8 @@ export class GameController {
     public revealTile(x: number, y: number) {
         if (this.state === "start") this.fillBoard(x, y);
         if (this.state !== "playing") return;
+        console.log("clicked", x, y);
+
         let value: TileProps[][];
         this.tiles.subscribe(v => value = v)();
 
