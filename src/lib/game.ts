@@ -11,7 +11,7 @@ export class GameController {
     private totalNonMineTiles: number = 0;
     private revealedNonMineTiles: number = 0;
 
-    private state: GameState = "playing";
+    private state: GameState = "start";
     public tiles: Writable<TileProps[][]>;
     private difficulty: Difficulty;
 
@@ -76,8 +76,12 @@ export class GameController {
         this.height = difficulty.height;
 
         this.generateTiles();
-        this.generateMines();
+    }
+
+    private fillBoard(x_start: number, y_start: number) {
+        this.generateMines(x_start, y_start);
         this.calculateMineCount();
+        this.state = "playing";
     }
 
     private generateTiles() {
@@ -94,8 +98,9 @@ export class GameController {
         this.tiles.set(newTiles);
     }
 
-    private generateMines() {
-        let mineCoords: {x: number, y: number}[] = [];
+    private generateMines(x_start: number, y_start: number) {
+        let mineCoords: { x: number, y: number }[] = [];
+        let avoidTiles: { x: number, y: number }[] = [];
         let value: TileProps[][];
         this.tiles.subscribe(v => value = v)();
         for (let i = 0; i < this.totalMines; i++) {
@@ -137,6 +142,7 @@ export class GameController {
     }
 
     public revealTile(x: number, y: number) {
+        if (this.state === "start") this.fillBoard(x, y);
         if (this.state !== "playing") return;
         let value: TileProps[][];
         this.tiles.subscribe(v => value = v)();
