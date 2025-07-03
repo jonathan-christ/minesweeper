@@ -16,7 +16,7 @@
 <div class="grid grid-cols-3 gap-0 border-red-600 w-fit divide-x-2 divide-y-2 divide-red-600">
     {#each matrix.data as row (row)}
         {#each row as cell (cell)}
-            <Tile isMine={false} mineCount={cell} bind:gameState/>
+            <Tile isMine={false} mineCount={cell}/>
         {/each}
     {/each}
 </div>
