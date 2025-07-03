@@ -166,7 +166,12 @@ export class GameController {
         const toReveal = new Set<string>();
         const visited = new Set<string>();
 
-        this.floodFillReveal(x, y, toReveal, visited);
+        if (this.tilesCache[y][x].isRevealed) {
+            this.fillAround(x, y, toReveal, visited);
+        }
+        else {
+            this.floodFillReveal(x, y, toReveal, visited);
+        }
 
         if (toReveal.size === 0) return;
 
@@ -209,16 +214,16 @@ export class GameController {
     private floodFillReveal(x: number, y: number, toReveal: Set<string>, visited: Set<string>) {
         // Check bounds
         if (x < 0 || x >= this.width || y < 0 || y >= this.height) return;
-        
+
         const coordKey = `${x},${y}`;
         if (visited.has(coordKey)) return;
         visited.add(coordKey);
-        
+
         const tile = this.tilesCache[y][x];
         if (tile.isRevealed || tile.isFlagged) return;
-        
+
         toReveal.add(coordKey);
-        
+
         // If this tile has no adjacent mines, continue flood fill
         if (!tile.isMine && tile.mineCount === 0) {
             for (let dy = -1; dy <= 1; dy++) {
@@ -230,25 +235,54 @@ export class GameController {
         }
     }
 
+    private fillAround(x: number, y: number, toReveal: Set<string>, visited: Set<string>) {
+        let flagCount = 0;
+
+        for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+                if (dx === 0 && dy === 0 || x + dx < 0 || x + dx >= this.width || y + dy < 0 || y + dy >= this.height) continue;
+                const tile = this.tilesCache[y + dy][x + dx];
+                if (tile.isRevealed) continue;
+                if (tile.isFlagged) flagCount++;
+                else toReveal.add(`${x + dx},${y + dy}`);
+            }
+        }
+
+        if (flagCount !== this.tilesCache[y][x].mineCount) {
+            toReveal.clear();
+            return;
+        }
+
+        for (const coordKey of toReveal) {
+            const [tileX, tileY] = coordKey.split(',').map(Number);
+            const tile = this.tilesCache[tileY][tileX];
+
+            if (!tile.isMine && tile.mineCount === 0) {
+                // This tile should flood fill - call floodFillReveal from this position
+                this.floodFillReveal(tileX, tileY, toReveal, visited);
+            }
+        }
+    }
+
     public flagTile(x: number, y: number) {
         if (this.state !== "playing") return;
         if (x < 0 || x >= this.width || y < 0 || y >= this.height) return;
 
         const tile = this.tilesCache[y][x];
         if (tile.isRevealed) return;
-        
+
         tile.isFlagged = !tile.isFlagged;
-        
+
         this.tiles.set(this.tilesCache);
     }
 
     private loseGame() {
         this.state = "lose";
         alert("You lose");
-        for(let y = 0; y < this.height; y++) {
-            for(let x = 0; x < this.width; x++) {
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
                 const tile = this.tilesCache[y][x];
-                if(tile.isMine) {
+                if (tile.isMine) {
                     tile.isRevealed = true;
                 }
             }
