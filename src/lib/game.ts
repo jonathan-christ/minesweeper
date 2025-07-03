@@ -74,7 +74,7 @@ export class GameController {
 
         this.generateTiles();
         this.generateMines();
-        this.CalculateMineCount();
+        this.calculateMineCount();
     }
 
     private generateTiles() {
@@ -110,7 +110,7 @@ export class GameController {
         this.tiles.set(value!);
     }
 
-    private CalculateMineCount() {
+    private calculateMineCount() {
         let value: TileProps[][];
         this.tiles.subscribe(v => value = v)();
         const searchAround = (x: number, y: number) => {
