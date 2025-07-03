@@ -92,11 +92,19 @@ export class GameController {
     }
 
     private generateMines() {
+        let mineCoords: {x: number, y: number}[] = [];
         let value: TileProps[][];
         this.tiles.subscribe(v => value = v)();
         for (let i = 0; i < this.totalMines; i++) {
             const x = Math.floor(Math.random() * this.width);
             const y = Math.floor(Math.random() * this.height);
+            
+            if (mineCoords.some(coord => coord.x === x && coord.y === y)) {
+                i--;
+                continue;
+            }
+
+            mineCoords.push({x, y});
             value![y][x].isMine = true;
         }
         this.tiles.set(value!);
