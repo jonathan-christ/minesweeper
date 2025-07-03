@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { type TileProps } from '$lib/types';
+	import { twMerge } from 'tailwind-merge';
 
 	let {
 		isMine = $bindable(false),
@@ -10,10 +11,24 @@
 		oncontextmenu
 	}: TileProps = $props();
 
-	function handleContextMenu(event: MouseEvent) {
+	const handleClick = () => onclick?.();
+	const handleContextMenu = (event: MouseEvent) => {
 		event.preventDefault();
 		oncontextmenu?.();
-	}
+	};
+
+	let displayContent = $derived<() => { bg: string; content: string }>(() => {
+		if (isRevealed) {
+			if (isMine) {
+				return { bg: 'bg-red-600', content: '💣' };
+			} else {
+				return { bg: 'bg-black', content: mineCount > 0 ? mineCount.toString() : '' };
+			}
+		} else if (isFlagged) {
+			return { bg: 'bg-green-600', content: '🚩' };
+		}
+		return { bg: 'bg-gray-400', content: '' };
+	});
 </script>
 
 <button
@@ -21,17 +36,7 @@
 	aria-label="Tile"
 	{onclick}
 	oncontextmenu={handleContextMenu}
-	class="h-[32px] w-[32px] bg-gray-400 text-white"
+	class={twMerge('h-[32px] w-[32px] text-white', displayContent().bg)}
 >
-	{#if isRevealed}
-		{#if isMine}
-			<div class="h-full w-full bg-red-600">💣</div>
-		{:else}
-			<div class="h-full w-full bg-black">
-				{mineCount > 0 ? mineCount : ''}
-			</div>
-		{/if}
-	{:else if isFlagged}
-		<div class="h-full w-full bg-green-600">🚩</div>
-	{/if}
+	{displayContent().content}
 </button>
