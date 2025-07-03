@@ -5,9 +5,11 @@ import { writable, type Writable } from 'svelte/store';
 export class GameController {
     private width: number = 0;
     private height: number = 0;
-
     private score: number = 0;
+
     private totalMines: number = 0;
+    private totalNonMineTiles: number = 0;
+    private revealedNonMineTiles: number = 0;
 
     private state: GameState = "playing";
     public tiles: Writable<TileProps[][]>;
@@ -69,6 +71,7 @@ export class GameController {
     private setupGame() {
         const difficulty = DIFFICULTY_SETUP[this.difficulty];
         this.totalMines = difficulty.mines;
+        this.totalNonMineTiles = difficulty.width * difficulty.height - difficulty.mines;
         this.width = difficulty.width;
         this.height = difficulty.height;
 
@@ -146,6 +149,14 @@ export class GameController {
 
         if (value![y][x].isMine) {
             this.state = "lose";
+            alert("You lose");
+            return;
+        }
+
+        this.revealedNonMineTiles++;
+        if(this.revealedNonMineTiles === this.totalNonMineTiles) {
+            this.state = "win";
+            alert("You win");
             return;
         }
 
