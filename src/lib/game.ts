@@ -122,6 +122,7 @@ export class GameController {
     }
 
     public revealTile(x: number, y: number) {
+        if (this.state !== "playing") return;
         let value: TileProps[][];
         this.tiles.subscribe(v => value = v)();
 
@@ -137,6 +138,7 @@ export class GameController {
     }
 
     public flagTile(x: number, y: number) {
+        if (this.state !== "playing") return;
         let value: TileProps[][];
         this.tiles.subscribe(v => value = v)();
         
