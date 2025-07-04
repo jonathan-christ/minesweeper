@@ -21,21 +21,23 @@
 	let displayContent = $derived<() => { bg: string; content: string }>(() => {
 		if (isRevealed) {
 			if (isMine) {
-				return { bg: 'bg-red-600', content: '💣' };
+				return { bg: 'bg-[url("/icons/tnt.png")]', content: '' };
 			} else {
-				return { bg: 'bg-black', content: mineCount > 0 ? mineCount.toString() : '' };
+				return { bg: 'bg-[url("/icons/dirt.png")]', content: mineCount > 0 ? mineCount.toString() : '' };
 			}
 		} else if (isFlagged) {
-			return { bg: 'bg-green-600', content: '🚩' };
+			return { bg: 'bg-[url("/icons/barrier.png")] hover:brightness-150', content: '' };
 		}
-		return { bg: 'bg-gray-400', content: '' };
+		return {
+			bg: 'hover:brightness-150 active:brightness-50 bg-[url("/icons/grass.png")]',
+			content: ''
+		};
 	});
 </script>
 
 <button
 	type="button"
 	aria-label="Tile"
-	{onclick}
 	oncontextmenu={handleContextMenu}
 	class={twMerge('h-[32px] w-[32px] bg-cover text-white', displayContent().bg, className)}
 	style="image-rendering: pixelated;"
