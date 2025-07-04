@@ -14,6 +14,12 @@
 		return unsubscribe;
 	});
 
+	const changeDifficulty = (difficulty: Difficulty) => {
+		game.setDifficulty(difficulty);
+		width = game.getWidth();
+		tiles = game.getTiles();
+	};
+
 	const classes = {
 		outer:
 			'shrink-0 bg-minecraft-button border-minecraft-border flex flex-col items-center justify-center border-4',
@@ -26,6 +32,17 @@
 	<div class={twMerge(classes.outer, 'mb-4 w-full')}>
 		<div id="controls" class={twMerge(classes.inner, 'flex items-center justify-start gap-2 w-full')}>
 			<button class="bg-white p-4" onclick={() => game.resetGame()}>Reset</button>
+			<select
+				class="bg-white p-4"
+				onchange={(e) => changeDifficulty(e.currentTarget.value as Difficulty)}
+			>
+				{#each ['easy', 'medium', 'hard'] as difficulty}
+					<option value={difficulty}>{difficulty}</option>
+				{/each}
+			</select>
+			<div id="flag_count" class="bg-white p-4">
+				Flags: {flags}
+			</div>
 		</div>
 	</div>
 
