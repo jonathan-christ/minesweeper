@@ -14,7 +14,6 @@
 		class: className = ''
 	}: TileProps = $props();
 
-	const handleClick = () => onclick?.();
 	const handleContextMenu = (event: MouseEvent) => {
 		event.preventDefault();
 		oncontextmenu?.();
