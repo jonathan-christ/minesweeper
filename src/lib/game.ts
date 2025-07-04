@@ -12,7 +12,13 @@ export class GameController {
     private revealedNonMineTiles: number = 0;
     private flags: number = 0;
 
-    private state: GameState = "start";
+    private startTime: Date | null = null;
+    private totalTime: number = 0; //seconds
+    private timerInterval: number | null = null;
+    public timer: Writable<number> = writable(0);
+
+    private state: Writable<GameState> = writable("start");
+    private stateCache: GameState = "start";
     private difficulty: Difficulty;
 
     public tiles: Writable<TileProps[][]>;
@@ -24,6 +30,15 @@ export class GameController {
 
         this.tiles.subscribe(tiles => {
             this.tilesCache = tiles;
+        });
+
+        this.state.subscribe(state => {
+            this.stateCache = state;
+            if (state === "playing") {
+                this.startTimer();
+            } else {
+                this.stopTimer();
+            }
         });
 
         this.setupGame();
@@ -57,6 +72,19 @@ export class GameController {
         return this.flags;
     }
 
+    public getTime() { 
+        if (this.startTime && this.stateCache === "playing") {
+            // Calculate current elapsed time while playing
+            const now = new Date();
+            return Math.floor((now.getTime() - this.startTime.getTime()) / 1000);
+        }
+        return this.totalTime;
+    }
+
+    public getStartTime() {
+        return this.startTime;
+    }
+
     public getTiles() {
         let value: TileProps[][];
         this.tiles.subscribe(v => value = v)();
@@ -66,6 +94,10 @@ export class GameController {
     public getTile(x: number, y: number): TileProps | undefined {
         if (x < 0 || x >= this.width || y < 0 || y >= this.height) return undefined;
         return this.tilesCache[y]?.[x];
+    }
+
+    public getTimer() {
+        return this.timer;
     }
 
     public setDifficulty(difficulty: Difficulty) {
@@ -83,17 +115,39 @@ export class GameController {
         this.totalNonMineTiles = difficulty.width * difficulty.height - difficulty.mines;
         this.width = difficulty.width;
         this.height = difficulty.height;
-        this.state = "start";
         this.revealedNonMineTiles = 0;
         this.flags = this.totalMines;
-
+        this.startTime = null;
+        this.totalTime = 0;
+        
+        this.timer.set(0);
+        this.state.set("start");
         this.generateTiles();
+    }
+
+    private startTimer() {
+        if (this.timerInterval) return; // Already running
+
+        this.timerInterval = setInterval(() => {
+            if (this.startTime && this.stateCache === "playing") {
+                const currentTime = this.getTime();
+                this.timer.set(currentTime);
+            }
+        }, 1000) as unknown as number;
+    }
+
+    private stopTimer() {
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
     }
 
     private fillBoard(x_start: number, y_start: number) {
         this.generateMines(x_start, y_start);
         this.calculateMineCount();
-        this.state = "playing";
+        this.state.set("playing");
+        this.startTime = new Date();
     }
 
     private generateTiles() {
@@ -166,8 +220,8 @@ export class GameController {
     }
 
     public revealTile(x: number, y: number) {
-        if (this.state === "start") this.fillBoard(x, y);
-        if (this.state !== "playing") return;
+        if (this.stateCache === "start") this.fillBoard(x, y);
+        if (this.stateCache !== "playing") return;
 
         const toReveal = new Set<string>();
         const visited = new Set<string>();
@@ -211,7 +265,8 @@ export class GameController {
         }
 
         if (this.revealedNonMineTiles === this.totalNonMineTiles) {
-            this.state = "win";
+            this.calculateTotalTime();
+            this.state.set("win");
             alert("You win");
             return;
         }
@@ -271,7 +326,7 @@ export class GameController {
     }
 
     public flagTile(x: number, y: number) {
-        if (this.state !== "playing") return;
+        if (this.stateCache !== "playing") return;
         if (x < 0 || x >= this.width || y < 0 || y >= this.height) return;
 
         const tile = this.tilesCache[y][x];
@@ -285,8 +340,17 @@ export class GameController {
         this.tiles.set(this.tilesCache);
     }
 
+    private calculateTotalTime() {
+        if (this.startTime) {
+            const now = new Date();
+            this.totalTime = Math.floor((now.getTime() - this.startTime.getTime()) / 1000);
+            this.startTime = null;
+        }
+    }
+
     private loseGame() {
-        this.state = "lose";
+        this.calculateTotalTime();
+        this.state.set("lose");
         alert("You lose");
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
@@ -298,6 +362,10 @@ export class GameController {
         }
 
         this.tiles.set(this.tilesCache);
+    }
+
+    public destroy() {
+        this.stopTimer();
     }
 
 }
