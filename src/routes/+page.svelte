@@ -1,7 +1,9 @@
 <script lang="ts">
 	import Game from '$lib/components/Game.svelte';
+	import CloudBackground from '$lib/components/CloudBackground.svelte';
 </script>
 
-<div class="bg-black flex flex-col items-center justify-center h-screen">
+<CloudBackground />
+<div class="flex flex-col items-center justify-center h-screen">
 	<Game />
 </div>
