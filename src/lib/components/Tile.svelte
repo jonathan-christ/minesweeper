@@ -42,7 +42,7 @@
 	type="button"
 	aria-label="Tile"
 	oncontextmenu={handleContextMenu}
-	class={twMerge('h-[32px] w-[32px] bg-cover', mineCountColor, displayContent().bg, className)}
+	class={twMerge('h-[32px] w-[32px] bg-cover shrink-0', mineCountColor, displayContent().bg, className)}
 	style="image-rendering: pixelated;"
 	{onclick}
 >
