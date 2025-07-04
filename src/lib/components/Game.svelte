@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Tile from './Tile.svelte';
+	import Timer from './Timer.svelte';
 	import { GameController } from '$lib/game';
 	import { twMerge } from 'tailwind-merge';
 	import type { Difficulty } from '$lib/types';
@@ -10,6 +11,8 @@
 	let width = $state(game.getWidth());
 	let tiles = $state(game.getTiles());
 	let flags = $state(game.getFlags());
+	let time = $state(game.getTimer());
+	
 	$effect(() => {
 		const unsubscribe = game.tiles.subscribe((newTiles) => {
 			tiles = newTiles;
@@ -17,6 +20,7 @@
 		});
 		return unsubscribe;
 	});
+
 
 	const changeDifficulty = (difficulty: Difficulty) => {
 		game.setDifficulty(difficulty);
@@ -78,6 +82,19 @@
 	</div>
 {/snippet}
 
+{#snippet timeCounter()}
+	<div class="flex w-full shrink-0 flex-row items-center justify-start gap-2 pr-2">
+		<img
+			src="/icons/time.png"
+			alt=""
+			class="aspect-square h-[2rem] object-cover"
+			style="image-rendering: pixelated;"
+			draggable="false"
+		/>
+		<Timer seconds={time} />
+	</div>
+{/snippet}
+
 {#snippet flagCount()}
 	<div id="flag_count" class="flex w-full shrink-0 flex-row items-center justify-start gap-2 pr-2">
 		<img
@@ -94,9 +111,12 @@
 {/snippet}
 
 <div class="flex w-fit flex-col items-center justify-center">
-	<div id="controls" class="flex w-full items-center justify-between text-white">
-		{@render minecraftButton(resetButton)}
-		{@render minecraftButton(difficultySelector)}
+	<div id="controls" class="flex w-full items-center justify-between gap-2 text-white">
+		<div class="flex w-full items-center justify-between gap-2">
+			{@render minecraftButton(resetButton)}
+			{@render minecraftButton(difficultySelector)}
+		</div>
+		{@render minecraftButton(timeCounter)}
 		{@render minecraftButton(flagCount)}
 	</div>
 
