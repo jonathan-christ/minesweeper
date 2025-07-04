@@ -4,6 +4,6 @@
 </script>
 
 <CloudBackground />
-<div class="flex flex-col items-center justify-center h-screen w-screen">
+<div class="flex flex-col items-center justify-center md:h-screen md:w-screen w-[1024px] h-[768px]">
 	<Game />
 </div>
