@@ -10,6 +10,7 @@ export class GameController {
     private totalMines: number = 0;
     private totalNonMineTiles: number = 0;
     private revealedNonMineTiles: number = 0;
+    private flags: number = 0;
 
     private state: GameState = "start";
     private difficulty: Difficulty;
@@ -52,6 +53,10 @@ export class GameController {
         return this.totalMines;
     }
 
+    public getFlags() {
+        return this.flags;
+    }
+
     public getTiles() {
         let value: TileProps[][];
         this.tiles.subscribe(v => value = v)();
@@ -80,6 +85,7 @@ export class GameController {
         this.height = difficulty.height;
         this.state = "start";
         this.revealedNonMineTiles = 0;
+        this.flags = this.totalMines;
 
         this.generateTiles();
     }
@@ -272,6 +278,9 @@ export class GameController {
         if (tile.isRevealed) return;
 
         tile.isFlagged = !tile.isFlagged;
+
+        if (tile.isFlagged) this.flags--;
+        else this.flags++;
 
         this.tiles.set(this.tilesCache);
     }
