@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { MINECOUNT_TO_COLOR } from '$lib/constants';
 	import { type TileProps } from '$lib/types';
+	import clsx from 'clsx';
 	import { twMerge } from 'tailwind-merge';
 
 	let {
@@ -24,7 +25,10 @@
 			if (isMine) {
 				return { bg: 'bg-[url("/icons/tnt.png")]', content: '' };
 			} else {
-				return { bg: 'bg-[url("/icons/dirt.png")]', content: mineCount > 0 ? mineCount.toString() : '' };
+				return {
+					bg: 'bg-[url("/icons/dirt.png")]',
+					content: mineCount > 0 ? mineCount.toString() : ''
+				};
 			}
 		} else if (isFlagged) {
 			return { bg: 'bg-[url("/icons/torch.png")] hover:brightness-150', content: '' };
@@ -42,7 +46,13 @@
 	type="button"
 	aria-label="Tile"
 	oncontextmenu={handleContextMenu}
-	class={twMerge('h-[32px] w-[32px] bg-cover shrink-0', mineCountColor, displayContent().bg, className)}
+	class={twMerge(
+		'h-[32px] w-[32px] shrink-0 bg-cover',
+		clsx((mineCount || !isRevealed) && 'cursor-pointer hover:brightness-150'),
+		mineCountColor,
+		displayContent().bg,
+		className
+	)}
 	style="image-rendering: pixelated;"
 	{onclick}
 >
