@@ -2,14 +2,17 @@
 	import Tile from './Tile.svelte';
 	import { GameController } from '$lib/game';
 	import { twMerge } from 'tailwind-merge';
+	import type { Difficulty } from '$lib/types';
 
-	const game = new GameController('hard');
-	const width = game.getWidth();
+	const game = new GameController('easy');
 
+	let width = $state(game.getWidth());
 	let tiles = $state(game.getTiles());
+	let flags = $state(game.getFlags());
 	$effect(() => {
 		const unsubscribe = game.tiles.subscribe((newTiles) => {
 			tiles = newTiles;
+			flags = game.getFlags();
 		});
 		return unsubscribe;
 	});
@@ -28,9 +31,12 @@
 	};
 </script>
 
-<div class="flex flex-col items-center justify-center w-fit">
+<div class="flex w-fit flex-col items-center justify-center">
 	<div class={twMerge(classes.outer, 'mb-4 w-full')}>
-		<div id="controls" class={twMerge(classes.inner, 'flex items-center justify-start gap-2 w-full')}>
+		<div
+			id="controls"
+			class={twMerge(classes.inner, 'flex w-full items-center justify-start gap-2')}
+		>
 			<button class="bg-white p-4" onclick={() => game.resetGame()}>Reset</button>
 			<select
 				class="bg-white p-4"
@@ -47,7 +53,10 @@
 	</div>
 
 	<div class={classes.outer + ' w-auto overflow-auto'}>
-		<div class={classes.inner + ' w-auto'} style="grid-template-columns: repeat({width}, minmax(0, 1fr));">
+		<div
+			class={classes.inner + ' w-auto'}
+			style="grid-template-columns: repeat({width}, minmax(0, 1fr));"
+		>
 			{#each tiles as row, y (`row-${y}`)}
 				{#each row as cell, x (`cell-${y}-${x}`)}
 					<Tile
