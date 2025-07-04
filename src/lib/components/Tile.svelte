@@ -8,7 +8,8 @@
 		mineCount = $bindable(0),
 		isFlagged = $bindable(false),
 		onclick,
-		oncontextmenu
+		oncontextmenu,
+		class: className = ''
 	}: TileProps = $props();
 
 	const handleClick = () => onclick?.();
@@ -36,7 +37,9 @@
 	aria-label="Tile"
 	{onclick}
 	oncontextmenu={handleContextMenu}
-	class={twMerge('h-[32px] w-[32px] text-white', displayContent().bg)}
+	class={twMerge('h-[32px] w-[32px] bg-cover text-white', displayContent().bg, className)}
+	style="image-rendering: pixelated;"
+	{onclick}
 >
 	{displayContent().content}
 </button>

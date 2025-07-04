@@ -5,6 +5,7 @@ export type TileProps = {
     isFlagged?: boolean;
 	onclick?: () => void;
 	oncontextmenu?: () => void;
+	class?: string;
 };
 
 export type GameState = "win" | "lose" | "playing" | "start";
