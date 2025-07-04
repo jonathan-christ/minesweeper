@@ -2,6 +2,33 @@
 
 @import "tw-animate-css";
 
+@theme {
+  --color-minecraft-button: #323234;
+  --color-minecraft-button-horizontal-active: #49494b;
+  --color-minecraft-button-inner: #494a4c;
+  --color-minecraft-button-bevel: #323234;
+  --color-minecraft-button-bevel-active: #4a4a4c;
+  --color-minecraft-border: #202022;
+  --color-minecraft-border-inner: #6e6e70;
+  --color-minecraft-border-bottom: #5e5e60;
+  --color-minecraft-hover: #3b8526;
+  --color-minecraft-hover-border: #66a053;
+  --color-minecraft-hover-bevel: #315729;
+  --color-minecraft-active: #323234;
+  --color-minecraft-active-border: #5a5a5c;
+  --color-minecraft-radio-border: #202022;
+
+  --font-body: 'JetBrains Mono Variable', monospace;
+  --font-title: "Retro Computer", sans-serif;
+}
+
+@font-face {
+  font-family: "Retro Computer";
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/retro_computer_personal_use.ttf") format("truetype");
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -118,4 +145,8 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+body {
+  font-family: var(--font-title);
 }
