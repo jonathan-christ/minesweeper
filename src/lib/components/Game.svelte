@@ -6,6 +6,7 @@
 	import type { Difficulty } from '$lib/types';
 	import { onMount, type Snippet } from 'svelte';
 	import SelectButton from './SelectButton.svelte';
+	import { fade } from 'svelte/transition';
 
 	const game = new GameController('easy');
 
@@ -14,12 +15,13 @@
 	let flags = $state(game.getFlags());
 	let time = $state(game.getTimer());
 	let currentDifficulty = $state<Difficulty>(game.getDifficulty());
-
+	let gameState = $state(game.getState());
 
 	$effect(() => {
 		const unsubscribe = game.tiles.subscribe((newTiles) => {
 			tiles = newTiles;
 			flags = game.getFlags();
+			gameState = game.getState();
 		});
 		return unsubscribe;
 	});
@@ -122,6 +124,15 @@
 	</Button>
 {/snippet}
 
+{#snippet gameOver(title: string)}
+	<div
+		in:fade={{ duration: 500 }}
+		class="absolute inset-0 z-50 flex items-center justify-center bg-black/75"
+	>
+		<div class="text-2xl font-bold text-white">{title}</div>
+	</div>
+{/snippet}
+
 <div class="flex w-fit flex-col items-center justify-center">
 	<div id="controls" class="mb-2 flex w-full items-center justify-between gap-2 text-white">
 		<div class="flex w-fit items-center justify-between gap-2">
@@ -136,9 +147,12 @@
 
 	<div class={classes.outer + ' w-auto overflow-auto'}>
 		<div
-			class={classes.inner + ' w-auto'}
+			class={classes.inner + ' w-auto relative'}
 			style="grid-template-columns: repeat({width}, minmax(0, 1fr));"
 		>
+			{#if gameState === 'lose' || gameState === 'win'}
+				{@render gameOver(gameState === 'lose' ? 'Game Over' : 'You Win')}
+			{/if}
 			{#each tiles as row, y (`row-${y}`)}
 				{#each row as cell, x (`cell-${y}-${x}`)}
 					<Tile
