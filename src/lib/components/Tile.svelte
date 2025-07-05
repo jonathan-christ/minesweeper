@@ -121,7 +121,8 @@
 		clsx((mineCount || !isRevealed) && 'cursor-pointer hover:brightness-150'),
 		mineCountColor,
 		displayContent().bg,
-		className
+		className,
+		'select-none'
 	)}
 	style="image-rendering: pixelated;"
 	onclick={handleClick}
