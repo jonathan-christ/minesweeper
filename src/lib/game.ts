@@ -1,6 +1,20 @@
 import type { GameState, TileProps, Difficulty } from "./types";
 import { writable, type Writable } from 'svelte/store';
 import { DIFFICULTY_SETUP } from "./constants";
+import { Sound } from "./audio";
+
+const tntSound = new Sound('/audio/tnt.ogg', { volume: 0.5 });
+const loseSound = () => {
+    tntSound.play();
+    setTimeout(() => {
+        tntSound.play();
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => {
+                tntSound.play();
+            }, 125*i);
+        }
+    }, 1000);
+}
 
 export class GameController {
     private width: number = 0;
@@ -53,7 +67,7 @@ export class GameController {
     }
 
     public getState() {
-        return this.state;
+        return this.stateCache;
     }
 
     public getScore() {
@@ -72,7 +86,7 @@ export class GameController {
         return this.flags;
     }
 
-    public getTime() { 
+    public getTime() {
         if (this.startTime && this.stateCache === "playing") {
             // Calculate current elapsed time while playing
             const now = new Date();
@@ -119,7 +133,7 @@ export class GameController {
         this.flags = this.totalMines;
         this.startTime = null;
         this.totalTime = 0;
-        
+
         this.timer.set(0);
         this.state.set("start");
         this.generateTiles();
@@ -265,9 +279,7 @@ export class GameController {
         }
 
         if (this.revealedNonMineTiles === this.totalNonMineTiles) {
-            this.calculateTotalTime();
-            this.state.set("win");
-            alert("You win");
+            this.winGame();
             return;
         }
     }
@@ -349,9 +361,9 @@ export class GameController {
     }
 
     private loseGame() {
+        loseSound();
         this.calculateTotalTime();
         this.state.set("lose");
-        alert("You lose");
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
                 const tile = this.tilesCache[y][x];
@@ -360,6 +372,13 @@ export class GameController {
                 }
             }
         }
+
+        this.tiles.set(this.tilesCache);
+    }
+
+    private winGame() {
+        this.calculateTotalTime();
+        this.state.set("win");
 
         this.tiles.set(this.tilesCache);
     }
