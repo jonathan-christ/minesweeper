@@ -25,11 +25,13 @@
 
 	const handleClick = () => {
 		let random = Math.round(Math.random() * 4);
-		if (isMine) {
-			digSounds.tnt.play();
-		} else {
-			if (random === 0) random = 1;
-			digSounds[`dig${random}`]?.play();
+		if (!isFlagged) {
+			if (isMine) {
+				digSounds.tnt.play();
+			} else if (!isRevealed || (isRevealed && mineCount > 0)) {
+				if (random === 0) random = 1;
+				digSounds[`dig${random}`]?.play();
+			}
 		}
 		onclick?.();
 	};
