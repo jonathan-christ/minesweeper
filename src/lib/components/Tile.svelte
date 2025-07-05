@@ -17,6 +17,9 @@
 
 	const handleContextMenu = (event: MouseEvent) => {
 		event.preventDefault();
+		if (!isFlagged && !isRevealed) {
+			digSounds.flag.play();
+		}
 		oncontextmenu?.();
 	};
 
@@ -25,10 +28,11 @@
 		if (isMine) {
 			digSounds.tnt.play();
 		} else {
+			if (random === 0) random = 1;
 			digSounds[`dig${random}`]?.play();
 		}
 		onclick?.();
-	}
+	};
 
 	let displayContent = $derived<() => { bg: string; content: string }>(() => {
 		if (isRevealed) {
@@ -50,13 +54,14 @@
 	});
 
 	const mineCountColor = $derived(MINECOUNT_TO_COLOR[mineCount]);
-	const digSounds : {[key: string]: Sound} = {
+	const digSounds: { [key: string]: Sound } = {
 		dig1: new Sound('/audio/dig1.ogg', { volume: 0.5 }),
 		dig2: new Sound('/audio/dig2.ogg', { volume: 0.5 }),
 		dig3: new Sound('/audio/dig3.ogg', { volume: 0.5 }),
 		dig4: new Sound('/audio/dig4.ogg', { volume: 0.5 }),
 		tnt: new Sound('/audio/tnt.ogg', { volume: 0.5 }),
-	}
+		flag: new Sound('/audio/torch.ogg', { volume: 0.5 })
+	};
 </script>
 
 <button
