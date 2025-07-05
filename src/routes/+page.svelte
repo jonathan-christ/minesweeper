@@ -37,10 +37,10 @@
 
 <CloudBackground />
 <div
-	class="relative flex h-[1024px] w-[1024px] flex-col items-center justify-center lg:h-screen lg:w-screen"
+	class="relative h-full lg:h-full min-h-screen w-full flex-col items-center gap-0 lg:flex lg:justify-center"
 >
 	<Game />
-	<div class="absolute bottom-0">
+	<div class="w-full p-0 lg:w-[19rem] z-100 lg:absolute lg:bottom-0 relative h-fit">
 		<Credits />
 	</div>
 </div>
