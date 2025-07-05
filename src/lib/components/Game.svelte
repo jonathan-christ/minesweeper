@@ -2,9 +2,10 @@
 	import Tile from './Tile.svelte';
 	import Timer from './Timer.svelte';
 	import { GameController } from '$lib/game';
-	import { twMerge } from 'tailwind-merge';
+	import Button from './Button.svelte';
 	import type { Difficulty } from '$lib/types';
-	import type { Snippet } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
+	import SelectButton from './SelectButton.svelte';
 
 	const game = new GameController('easy');
 
@@ -12,7 +13,9 @@
 	let tiles = $state(game.getTiles());
 	let flags = $state(game.getFlags());
 	let time = $state(game.getTimer());
-	
+	let currentDifficulty = $state<Difficulty>(game.getDifficulty());
+
+
 	$effect(() => {
 		const unsubscribe = game.tiles.subscribe((newTiles) => {
 			tiles = newTiles;
@@ -21,9 +24,9 @@
 		return unsubscribe;
 	});
 
-
 	const changeDifficulty = (difficulty: Difficulty) => {
 		game.setDifficulty(difficulty);
+		currentDifficulty = difficulty;
 		width = game.getWidth();
 		tiles = game.getTiles();
 	};
@@ -34,90 +37,101 @@
 		inner:
 			'shrink-0 bg-minecraft-button-inner border-minecraft-border-inner border-b-minecraft-border-bottom grid w-fit gap-0 border-4'
 	};
+
+	const difficultyOptions = [
+		{ value: 'easy', label: 'Easy' },
+		{ value: 'medium', label: 'Medium' },
+		{ value: 'hard', label: 'Hard' }
+	];
 </script>
 
-{#snippet minecraftButton(children: Snippet)}
-	<div class={twMerge(classes.outer, 'mb-4 w-fit')}>
-		<div class={twMerge(classes.inner, 'w-fit')}>
-			{@render children()}
-		</div>
-	</div>
-{/snippet}
-
 {#snippet resetButton()}
-	<button
-		class="flex w-full shrink-0 flex-row items-center justify-center gap-2 pr-2"
+	<Button
+		className="w-full p-1"
+		borderClassName="w-fit"
 		onclick={() => game.resetGame()}
+		label="Reset"
 	>
 		<img
 			src="/icons/reset.png"
 			alt=""
-			class="aspect-square h-[2rem] object-cover"
+			class="h-[2rem] w-[2rem] object-cover"
 			style="image-rendering: pixelated;"
 			draggable="false"
 		/>
-		Reset
-	</button>
+	</Button>
 {/snippet}
 
 {#snippet difficultySelector()}
-	<div class="flex w-full shrink-0 flex-row items-center justify-center gap-2 pr-2">
-		<img
-			src="/icons/difficulty.png"
-			alt=""
-			class="aspect-square h-[2rem] object-cover"
-			style="image-rendering: pixelated;"
-			draggable="false"
-		/>
-		<select
-			class="focus:outline-none"
-			onchange={(e) => changeDifficulty(e.currentTarget.value as Difficulty)}
-		>
-			{#each ['easy', 'medium', 'hard'] as difficulty, index (index)}
-				<option class="bg-minecraft-button w-full border-0 p-0" value={difficulty}
-					>{difficulty}</option
-				>
-			{/each}
-		</select>
-	</div>
+	<SelectButton
+		options={difficultyOptions}
+		value={currentDifficulty}
+		className="w-full p-1"
+		borderClassName="w-fit"
+		onchange={changeDifficulty}
+	>
+		{#snippet icon()}
+			<img
+				src="/icons/difficulty.png"
+				alt=""
+				class="h-[2rem] w-[2rem] object-cover"
+				style="image-rendering: pixelated;"
+				draggable="false"
+			/>
+		{/snippet}
+	</SelectButton>
 {/snippet}
 
 {#snippet timeCounter()}
-	<div class="flex w-full shrink-0 flex-row items-center justify-start gap-2 pr-2">
+	<Button
+		className="w-full p-1"
+		marginClass="pb-[0.25rem]"
+		borderClassName="w-fit"
+		isActive
+		toggleLock
+	>
 		<img
 			src="/icons/time.png"
 			alt=""
-			class="aspect-square h-[2rem] object-cover"
+			class="h-[2rem] w-[2rem] shrink-0 object-cover"
 			style="image-rendering: pixelated;"
 			draggable="false"
 		/>
 		<Timer seconds={time} />
-	</div>
+	</Button>
 {/snippet}
 
 {#snippet flagCount()}
-	<div id="flag_count" class="flex w-full shrink-0 flex-row items-center justify-start gap-2 pr-2">
+	<Button
+		className="w-full p-1"
+		marginClass="pb-[0.25rem]"
+		borderClassName="w-fit"
+		isActive
+		toggleLock
+	>
 		<img
 			src="/icons/flags_left.png"
 			alt=""
-			class="aspect-square h-[2rem] object-cover"
+			class="h-[2rem] w-[2rem] shrink-0 object-cover"
 			style="image-rendering: pixelated;"
 			draggable="false"
 		/>
 		<span class="w-[2rem] text-center">
 			{flags}
 		</span>
-	</div>
+	</Button>
 {/snippet}
 
 <div class="flex w-fit flex-col items-center justify-center">
-	<div id="controls" class="flex w-full items-center justify-between gap-2 text-white">
-		<div class="flex w-full items-center justify-between gap-2">
-			{@render minecraftButton(resetButton)}
-			{@render minecraftButton(difficultySelector)}
+	<div id="controls" class="mb-2 flex w-full items-center justify-between gap-2 text-white">
+		<div class="flex w-fit items-center justify-between gap-2">
+			{@render resetButton()}
+			{@render difficultySelector()}
 		</div>
-		{@render minecraftButton(timeCounter)}
-		{@render minecraftButton(flagCount)}
+		<div class="flex w-fit items-center justify-between gap-2">
+			{@render timeCounter()}
+			{@render flagCount()}
+		</div>
 	</div>
 
 	<div class={classes.outer + ' w-auto overflow-auto'}>
