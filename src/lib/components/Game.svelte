@@ -47,7 +47,7 @@
 
 {#snippet resetButton()}
 	<Button
-		className="w-full p-1"
+		className="w-full p-1 pr-2"
 		borderClassName="w-fit"
 		onclick={() => game.resetGame()}
 		label="Reset"
