@@ -2,18 +2,18 @@
     import type { Writable } from "svelte/store";
     import { onDestroy } from "svelte";
     
-    let { seconds }: { seconds: Writable<number> } = $props();
+    let { seconds }: { seconds: Writable<number> | undefined } = $props();
 
     let currentSeconds = $state(0);
     
     // Subscribe to the store and update currentSeconds
-    const unsubscribe = seconds.subscribe(value => {
+    const unsubscribe = seconds?.subscribe(value => {
         currentSeconds = value;
     });
     
     // Clean up subscription on component destroy
     onDestroy(() => {
-        unsubscribe();
+        unsubscribe?.();
     });
 
     const minutes = $derived(Math.floor(currentSeconds / 60));
