@@ -1,6 +1,6 @@
 import type { GameState, TileProps, Difficulty } from "./types";
-import { DIFFICULTY_SETUP } from "./constants";
 import { writable, type Writable } from 'svelte/store';
+import { DIFFICULTY_SETUP } from "./constants";
 
 export class GameController {
     private width: number = 0;
