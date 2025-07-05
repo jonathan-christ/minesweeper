@@ -9,16 +9,16 @@
 	title="Mine-sweeper"
 	titleTemplate="%s | Play Online"
 	description="Play Minecraft-themed Minesweeper online! A classic puzzle game reimagined with Minecraft's iconic style, sounds, and visuals."
-	canonical="https://portfolio-jonathanchrists-projects.vercel.app/"
+	canonical="https://minesweeper-jonathanchrists-projects.vercel.app/"
 	openGraph={{
 		type: 'website',
-		url: 'https://portfolio-jonathanchrists-projects.vercel.app/',
+		url: 'https://minesweeper-jonathanchrists-projects.vercel.app/',
 		title: "Mine-sweeper | Play Online",
 		description:
 			"Play Minecraft-themed Minesweeper online! A classic puzzle game reimagined with Minecraft's iconic style, sounds, and visuals.",
 		images: [
 			{
-				url: 'https://portfolio-jonathanchrists-projects.vercel.app/og_image.png',
+				url: 'https://minesweeper-jonathanchrists-projects.vercel.app/og_image.png',
 				width: 1200,
 				height: 630,
 				alt: 'Minecraft Minesweeper Game Preview'
@@ -30,7 +30,7 @@
 		title: "Minecraft Minesweeper | Play Online",
 		description:
 			"Play Minecraft-themed Minesweeper online! A classic puzzle game reimagined with Minecraft's iconic style, sounds, and visuals.",
-		image: 'https://portfolio-jonathanchrists-projects.vercel.app/og_image.png',
+		image: 'https://minesweeper-jonathanchrists-projects.vercel.app/og_image.png',
 		cardType: 'summary_large_image'
 	}}
 />
