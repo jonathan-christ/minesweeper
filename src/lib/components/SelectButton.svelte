@@ -145,7 +145,7 @@
 
 		<select
 			id="difficulty-selector"
-			class="w-full cursor-pointer appearance-none bg-transparent focus:outline-none"
+			class="w-full cursor-pointer bg-transparent focus:outline-none"
 			bind:this={selectElement}
 			{value}
 			onchange={handleSelectChange}
@@ -160,14 +160,6 @@
 			{/each}
 		</select>
 
-		<!-- Custom dropdown arrow -->
-		<div class="pointer-events-none shrink-0">
-			<svg class="h-4 w-4 fill-current" viewBox="0 0 20 20">
-				<path
-					d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-				/>
-			</svg>
-		</div>
 	</div>
 
 	<!-- Bottom bevel -->
