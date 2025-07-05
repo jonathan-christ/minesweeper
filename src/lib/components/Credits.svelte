@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Separator } from '$lib/components/ui/separator';
 	import Button from '$lib/components/Button.svelte';
 	let showCredits = $state(false);
 </script>

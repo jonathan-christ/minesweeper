@@ -16,7 +16,6 @@
 		isActive = false,
 		toggleLock = false,
 		activeHighlight = false,
-		copyText = '',
 		onclick = () => {},
 		onmouseenter = () => {},
 		onmouseleave = () => {},
@@ -37,7 +36,6 @@
 		isActive?: boolean;
 		toggleLock?: boolean;
 		activeHighlight?: boolean;
-		copyText?: string;
 	} = $props();
 
 	// Base styles for the outer container

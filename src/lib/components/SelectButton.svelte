@@ -60,7 +60,7 @@
 			selectElement.focus();
 			// Use the native showPicker method if available, fallback to click()
 			if ('showPicker' in selectElement) {
-				(selectElement as any).showPicker();
+				(selectElement as HTMLSelectElement).showPicker();
 			} else {
 				(selectElement as HTMLElement).click();
 			}
@@ -130,9 +130,6 @@
 	);
 
 	const clickSound = new Sound('/audio/button_click.mp3', { volume: 0.5 });
-
-	// Get the current selected option's label
-	const selectedLabel = $derived(options.find((option) => option.value === value)?.label || value);
 </script>
 
 <button class={outerClasses} onclick={handleContainerClick} {onmouseenter} {onmouseleave}>
@@ -153,13 +150,12 @@
 			onblur={handleSelectBlur}
 			onclick={handleSelectClick}
 		>
-			{#each options as option}
+			{#each options as option (option.value)}
 				<option value={option.value} class="bg-minecraft-button w-full text-white">
 					{option.label}
 				</option>
 			{/each}
 		</select>
-
 	</div>
 
 	<!-- Bottom bevel -->

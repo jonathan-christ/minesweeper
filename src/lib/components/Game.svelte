@@ -4,7 +4,6 @@
 	import { GameController } from '$lib/game';
 	import Button from './Button.svelte';
 	import type { Difficulty } from '$lib/types';
-	import { onMount, type Snippet } from 'svelte';
 	import SelectButton from './SelectButton.svelte';
 	import { fade } from 'svelte/transition';
 
