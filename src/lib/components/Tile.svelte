@@ -12,7 +12,9 @@
 		isFlagged = $bindable(false),
 		onclick,
 		oncontextmenu,
-		class: className = ''
+		class: className = '',
+		isMobile = false,
+		difficulty = 'easy'
 	}: TileProps = $props();
 
 	let touchTimeout: number | undefined;
@@ -98,6 +100,8 @@
 		};
 	});
 
+	const tileSize = $derived(isMobile && difficulty === 'hard' ? 'h-[24px] w-[24px]' : 'h-[32px] w-[32px]');
+
 	const mineCountColor = $derived(MINECOUNT_TO_COLOR[mineCount]);
 	const digSounds: { [key: string]: Sound } = {
 		dig1: new Sound('/audio/dig1.ogg', { volume: 0.5 }),
@@ -117,7 +121,8 @@
 	ontouchend={isIOS ? handleTouchEnd : undefined}
 	ontouchmove={isIOS ? handleTouchMove : undefined}
 	class={twMerge(
-		'h-[32px] w-[32px] shrink-0 bg-cover',
+		tileSize,
+		'shrink-0 bg-cover',
 		clsx((mineCount || !isRevealed) && 'cursor-pointer hover:brightness-150'),
 		mineCountColor,
 		displayContent().bg,
