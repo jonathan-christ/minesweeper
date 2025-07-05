@@ -3,6 +3,7 @@
 	import { type TileProps } from '$lib/types';
 	import clsx from 'clsx';
 	import { twMerge } from 'tailwind-merge';
+	import { Sound } from '$lib/audio';
 
 	let {
 		isMine = $bindable(false),
@@ -18,6 +19,16 @@
 		event.preventDefault();
 		oncontextmenu?.();
 	};
+
+	const handleClick = () => {
+		let random = Math.round(Math.random() * 4);
+		if (isMine) {
+			digSounds.tnt.play();
+		} else {
+			digSounds[`dig${random}`]?.play();
+		}
+		onclick?.();
+	}
 
 	let displayContent = $derived<() => { bg: string; content: string }>(() => {
 		if (isRevealed) {
@@ -39,6 +50,13 @@
 	});
 
 	const mineCountColor = $derived(MINECOUNT_TO_COLOR[mineCount]);
+	const digSounds : {[key: string]: Sound} = {
+		dig1: new Sound('/audio/dig1.ogg', { volume: 0.5 }),
+		dig2: new Sound('/audio/dig2.ogg', { volume: 0.5 }),
+		dig3: new Sound('/audio/dig3.ogg', { volume: 0.5 }),
+		dig4: new Sound('/audio/dig4.ogg', { volume: 0.5 }),
+		tnt: new Sound('/audio/tnt.ogg', { volume: 0.5 }),
+	}
 </script>
 
 <button
@@ -53,7 +71,7 @@
 		className
 	)}
 	style="image-rendering: pixelated;"
-	{onclick}
+	onclick={handleClick}
 >
 	{displayContent().content}
 </button>
