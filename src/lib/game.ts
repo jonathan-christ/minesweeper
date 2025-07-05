@@ -34,12 +34,14 @@ export class GameController {
     private state: Writable<GameState> = writable("start");
     private stateCache: GameState = "start";
     private difficulty: Difficulty;
+    private difficultySetup: typeof DIFFICULTY_SETUP;
 
     public tiles: Writable<TileProps[][]>;
     private tilesCache: TileProps[][] = [];
 
-    constructor(difficulty: Difficulty = "easy") {
+    constructor(difficulty: Difficulty = "easy", difficultySetup: typeof DIFFICULTY_SETUP = DIFFICULTY_SETUP) {
         this.difficulty = difficulty;
+        this.difficultySetup = difficultySetup;
         this.tiles = writable([]);
 
         this.tiles.subscribe(tiles => {
@@ -100,9 +102,7 @@ export class GameController {
     }
 
     public getTiles() {
-        let value: TileProps[][];
-        this.tiles.subscribe(v => value = v)();
-        return value!;
+        return this.tilesCache;
     }
 
     public getTile(x: number, y: number): TileProps | undefined {
@@ -119,12 +119,17 @@ export class GameController {
         this.setupGame();
     }
 
+    public setDifficultySetup(setup: typeof DIFFICULTY_SETUP) {
+        this.difficultySetup = setup;
+        this.setupGame();
+    }
+
     public resetGame() {
         this.setupGame();
     }
 
     private setupGame() {
-        const difficulty = DIFFICULTY_SETUP[this.difficulty];
+        const difficulty = this.difficultySetup[this.difficulty];
         this.totalMines = difficulty.mines;
         this.totalNonMineTiles = difficulty.width * difficulty.height - difficulty.mines;
         this.width = difficulty.width;
