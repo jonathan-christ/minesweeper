@@ -6,15 +6,23 @@
 	import type { Difficulty } from '$lib/types';
 	import SelectButton from './SelectButton.svelte';
 	import { fade } from 'svelte/transition';
+	import MobileHeader from './MobileHeader.svelte';
+	import { DIFFICULTY_SETUP, MOBILE_DIFFICULTY_SETUP } from '$lib/constants';
+	import clsx from 'clsx';
+	import { twMerge } from 'tailwind-merge';
+	import { onMount } from 'svelte';
 
-	const game = new GameController('easy');
+	let isMobile = $state(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+	let initialRender = $state(true);
+	
+	const game = $derived(new GameController('easy', isMobile ? MOBILE_DIFFICULTY_SETUP : DIFFICULTY_SETUP));
 
-	let width = $state(game.getWidth());
-	let tiles = $state(game.getTiles());
-	let flags = $state(game.getFlags());
-	let time = $state(game.getTimer());
-	let currentDifficulty = $state<Difficulty>(game.getDifficulty());
-	let gameState = $state(game.getState());
+	let width = $derived(game.getWidth());
+	let tiles = $derived(game.getTiles());
+	let flags = $derived(game.getFlags());
+	let time = $derived(game.getTimer());
+	let currentDifficulty = $derived<Difficulty>(game.getDifficulty());
+	let gameState = $derived(game.getState());
 
 	$effect(() => {
 		const unsubscribe = game.tiles.subscribe((newTiles) => {
@@ -23,6 +31,34 @@
 			gameState = game.getState();
 		});
 		return unsubscribe;
+	});
+
+	const checkMobile = () => {
+		const wasMobile = isMobile;
+		isMobile = window.innerWidth < 1024;
+
+		// Only reset if this isn't the initial render and mobile state has changed
+		if (!initialRender && wasMobile !== isMobile) {
+			game.setDifficultySetup(isMobile ? MOBILE_DIFFICULTY_SETUP : DIFFICULTY_SETUP);
+			game.resetGame();
+			width = game.getWidth();
+			tiles = game.getTiles();
+			flags = game.getFlags();
+			time = game.getTimer();
+		}
+		initialRender = false;
+	};
+
+	$effect(() => {
+		if (typeof window !== 'undefined') {
+			checkMobile();
+			window.addEventListener('resize', checkMobile);
+			return () => window.removeEventListener('resize', checkMobile);
+		}
+	});
+
+	onMount(() => {
+		game.resetGame();
 	});
 
 	const changeDifficulty = (difficulty: Difficulty) => {
@@ -126,27 +162,68 @@
 {#snippet gameOver(title: string)}
 	<div
 		in:fade={{ duration: 500 }}
-		class="absolute inset-0 z-50 flex items-center justify-center bg-black/75"
+		class="absolute inset-0 z-10 flex items-center justify-center bg-black/75"
 	>
 		<div class="text-2xl font-bold text-white">{title}</div>
 	</div>
 {/snippet}
 
-<div class="flex w-fit flex-col items-center justify-center">
-	<div id="controls" class="mb-2 flex w-full items-center justify-between gap-2 text-white">
-		<div class="flex w-fit items-center justify-between gap-2">
-			{@render resetButton()}
-			{@render difficultySelector()}
-		</div>
-		<div class="flex w-fit items-center justify-between gap-2">
-			{@render timeCounter()}
-			{@render flagCount()}
-		</div>
-	</div>
+<svelte:head>
+	<style>
+		/* Prevent content shift during scroll */
+		html {
+			height: 100%;
+			overflow-y: auto;
+		}
+		body {
+			min-height: 100%;
+			overscroll-behavior-y: none;
+		}
+		/* Force hardware acceleration */
+		.game-container {
+			transform: translateZ(0);
+			backface-visibility: hidden;
+			perspective: 1000;
+			will-change: transform;
+		}
+	</style>
+</svelte:head>
 
-	<div class={classes.outer + ' w-auto overflow-auto'}>
+<div class="flex h-fit w-full flex-col items-center lg:w-fit lg:justify-center">
+	{#if isMobile}
+		<MobileHeader
+			{flags}
+			{time}
+			{currentDifficulty}
+			onReset={() => game.resetGame()}
+			onDifficultyChange={changeDifficulty}
+		/>
+	{:else}
+		<div id="controls" class="mb-2 flex w-full items-center justify-between gap-2 text-white">
+			<div class="flex w-fit items-center justify-between gap-2">
+				{@render resetButton()}
+				{@render difficultySelector()}
+			</div>
+			<div class="flex w-fit items-center justify-between gap-2">
+				{@render timeCounter()}
+				{@render flagCount()}
+			</div>
+		</div>
+	{/if}
+
+	<div
+		class={twMerge(
+			clsx(classes.outer, 
+				isMobile ? (
+					currentDifficulty === 'easy' ? 'h-[90vh]' : 'h-full'
+				) : 'h-fit',
+				'game-container py-4 lg:py-0 w-full lg:mt-0 lg:w-auto'
+			),
+			'justify-start'
+		)}
+	>
 		<div
-			class={classes.inner + ' w-auto relative'}
+			class={twMerge(clsx(classes.inner, 'relative h-fit lg:w-full'))}
 			style="grid-template-columns: repeat({width}, minmax(0, 1fr));"
 		>
 			{#if gameState === 'lose' || gameState === 'win'}
@@ -156,6 +233,8 @@
 				{#each row as cell, x (`cell-${y}-${x}`)}
 					<Tile
 						{...cell}
+						{isMobile}
+						difficulty={currentDifficulty}
 						class={y === 0 ? 'shadow-[inset_4px_8px_8px_-8px_rgba(0,0,0,1)]' : ''}
 						onclick={() => game.revealTile(x, y)}
 						oncontextmenu={() => game.flagTile(x, y)}
