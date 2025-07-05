@@ -6,7 +6,9 @@ export type TileProps = {
 	onclick?: () => void;
 	oncontextmenu?: () => void;
 	class?: string;
+	isMobile?: boolean;
+	difficulty?: Difficulty;
 };
 
 export type GameState = "win" | "lose" | "playing" | "start";
-export type Difficulty = "easy" | "medium" | "hard";
+export type Difficulty = 'easy' | 'medium' | 'hard';
