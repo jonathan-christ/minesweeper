@@ -15,12 +15,49 @@
 		class: className = ''
 	}: TileProps = $props();
 
+	let touchTimeout: number | undefined;
+	let touchStartTime = 0;
+	const LONG_PRESS_DURATION = 500; // Duration in milliseconds for long press
+
 	const handleContextMenu = (event: MouseEvent) => {
 		event.preventDefault();
 		if (!isFlagged && !isRevealed) {
 			digSounds.flag.play();
 		}
 		oncontextmenu?.();
+	};
+
+	const handleTouchStart = (event: TouchEvent) => {
+		event.preventDefault();
+		touchStartTime = Date.now();
+		touchTimeout = window.setTimeout(() => {
+			// Long press detected
+			handleContextMenu(new MouseEvent('contextmenu'));
+		}, LONG_PRESS_DURATION);
+	};
+
+	const handleTouchEnd = (event: TouchEvent) => {
+		event.preventDefault();
+		const touchDuration = Date.now() - touchStartTime;
+		
+		if (touchTimeout) {
+			clearTimeout(touchTimeout);
+			touchTimeout = undefined;
+		}
+
+		// If it's a short tap, treat as normal click
+		if (touchDuration < LONG_PRESS_DURATION) {
+			handleClick();
+		}
+	};
+
+	const handleTouchMove = (event: TouchEvent) => {
+		event.preventDefault();
+		// Cancel long press if finger moves
+		if (touchTimeout) {
+			clearTimeout(touchTimeout);
+			touchTimeout = undefined;
+		}
 	};
 
 	const handleClick = () => {
@@ -70,6 +107,9 @@
 	type="button"
 	aria-label="Tile"
 	oncontextmenu={handleContextMenu}
+	ontouchstart={handleTouchStart}
+	ontouchend={handleTouchEnd}
+	ontouchmove={handleTouchMove}
 	class={twMerge(
 		'h-[32px] w-[32px] shrink-0 bg-cover',
 		clsx((mineCount || !isRevealed) && 'cursor-pointer hover:brightness-150'),
