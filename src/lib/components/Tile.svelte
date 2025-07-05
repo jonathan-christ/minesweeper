@@ -19,6 +19,9 @@
 	let touchStartTime = 0;
 	const LONG_PRESS_DURATION = 500; // Duration in milliseconds for long press
 
+	// Detect iOS
+	const isIOS = $derived(typeof window !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent));
+
 	const handleContextMenu = (event: MouseEvent) => {
 		event.preventDefault();
 		if (!isFlagged && !isRevealed) {
@@ -28,6 +31,7 @@
 	};
 
 	const handleTouchStart = (event: TouchEvent) => {
+		if (!isIOS) return;
 		event.preventDefault();
 		touchStartTime = Date.now();
 		touchTimeout = window.setTimeout(() => {
@@ -37,6 +41,7 @@
 	};
 
 	const handleTouchEnd = (event: TouchEvent) => {
+		if (!isIOS) return;
 		event.preventDefault();
 		const touchDuration = Date.now() - touchStartTime;
 		
@@ -52,6 +57,7 @@
 	};
 
 	const handleTouchMove = (event: TouchEvent) => {
+		if (!isIOS) return;
 		event.preventDefault();
 		// Cancel long press if finger moves
 		if (touchTimeout) {
@@ -107,9 +113,9 @@
 	type="button"
 	aria-label="Tile"
 	oncontextmenu={handleContextMenu}
-	ontouchstart={handleTouchStart}
-	ontouchend={handleTouchEnd}
-	ontouchmove={handleTouchMove}
+	ontouchstart={isIOS ? handleTouchStart : undefined}
+	ontouchend={isIOS ? handleTouchEnd : undefined}
+	ontouchmove={isIOS ? handleTouchMove : undefined}
 	class={twMerge(
 		'h-[32px] w-[32px] shrink-0 bg-cover',
 		clsx((mineCount || !isRevealed) && 'cursor-pointer hover:brightness-150'),
