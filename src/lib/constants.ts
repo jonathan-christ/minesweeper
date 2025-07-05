@@ -6,6 +6,12 @@ export const DIFFICULTY_SETUP: Record<Difficulty, {width: number, height: number
     hard: {width: 30, height: 16, mines: 99}
 }
 
+export const MOBILE_DIFFICULTY_SETUP: Record<Difficulty, {width: number, height: number, mines: number}> = {
+    easy: {width: 6, height: 12, mines: 10},
+    medium: {width: 10, height: 21, mines: 35},
+    hard: {width: 13, height: 28, mines: 75}
+}
+
 export const MINECOUNT_TO_COLOR: Record<number, string> = {
     0: 'text-white',
     1: 'text-blue-500',
