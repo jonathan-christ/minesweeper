@@ -3,7 +3,7 @@
 	import Button from './Button.svelte';
 	import Timer from './Timer.svelte';
 	import type { Writable } from 'svelte/store';
-	import { audioManager } from '$lib/audio';
+	import { Sound } from '$lib/audio';
 
 	let {
 		flags = $bindable(0),
@@ -13,6 +13,7 @@
 		onDifficultyChange = (difficulty: Difficulty) => {}
 	} = $props();
 
+	const buttonClick = new Sound('/audio/button_click.mp3', { volume: 0.5 });
 	const difficultyOptions = [
 		{ value: 'easy', label: 'Easy' },
 		{ value: 'medium', label: 'Medium' },
@@ -20,18 +21,18 @@
 	];
 
 	const handleReset = () => {
-		audioManager.play('button_click');
+		buttonClick.play();
 		onReset();
 	};
 
 	const handleDifficultyChange = (e: Event) => {
-		audioManager.play('button_click');
+		buttonClick.play();
 		onDifficultyChange((e.currentTarget as HTMLSelectElement).value as Difficulty);
 	};
 </script>
 
 <Button toggleLock isActive borderClassName="mt-0" className="h-[7vh]">
-	<button class="flex h-8 w-8 items-center justify-center" onclick={handleReset}>
+	<button class="flex h-8 w-8 items-center justify-center active:brightness-50" onclick={handleReset}>
 		<img
 			src="/icons/reset.png"
 			alt="Reset"
