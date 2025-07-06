@@ -109,7 +109,7 @@
 		dig3: new Sound('/audio/dig3.ogg', { volume: 0.5 }),
 		dig4: new Sound('/audio/dig4.ogg', { volume: 0.5 }),
 		tnt: new Sound('/audio/tnt.ogg', { volume: 0.5 }),
-		flag: new Sound('/audio/torch.ogg', { volume: 0.5 })
+		flag: new Sound('/audio/torch.ogg', { volume: 1 })
 	};
 </script>
 
