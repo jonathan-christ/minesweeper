@@ -12,6 +12,8 @@
 	import { twMerge } from 'tailwind-merge';
 	import { onMount } from 'svelte';
 
+	let { difficulty = $bindable('easy') } : { difficulty: Difficulty } = $props();
+
 	let isMobile = $state(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
 	let initialRender = $state(true);
 	
@@ -23,6 +25,22 @@
 	let time = $derived(game.getTimer());
 	let currentDifficulty = $derived<Difficulty>(game.getDifficulty());
 	let gameState = $derived(game.getState());
+
+	// Preload all tile images for smooth gameplay
+	const preloadImages = () => {
+		const images = [
+			'/icons/grass.png',    // Default tile background
+			'/icons/dirt.png',     // Revealed tile background
+			'/icons/tnt.png',      // Mine tile
+			'/icons/torch.png',    // Flagged tile
+			'/icons/barrier.png',  // Additional icon that might be used
+		];
+
+		images.forEach(src => {
+			const img = new Image();
+			img.src = src;
+		});
+	};
 
 	$effect(() => {
 		const unsubscribe = game.tiles.subscribe((newTiles) => {
@@ -58,12 +76,14 @@
 	});
 
 	onMount(() => {
+		preloadImages(); // Preload images when component mounts
 		game.resetGame();
 	});
 
-	const changeDifficulty = (difficulty: Difficulty) => {
-		game.setDifficulty(difficulty);
-		currentDifficulty = difficulty;
+	const changeDifficulty = (new_difficulty: Difficulty) => {
+		game.setDifficulty(new_difficulty);
+		currentDifficulty = new_difficulty;
+		difficulty = new_difficulty;
 		width = game.getWidth();
 		tiles = game.getTiles();
 	};

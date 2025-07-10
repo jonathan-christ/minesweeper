@@ -2,7 +2,10 @@
 	import { MetaTags } from 'svelte-meta-tags';
 	import Game from '$lib/components/Game.svelte';
 	import CloudBackground from '$lib/components/CloudBackground.svelte';
-	import Credits from '$lib/components/Credits.svelte';
+	import { MetaTags } from 'svelte-meta-tags';
+	import type { Difficulty } from '$lib/types';
+	
+	let difficulty: Difficulty = $state('easy');
 </script>
 
 <MetaTags
@@ -39,8 +42,8 @@
 <div
 	class="relative h-full lg:h-full min-h-screen w-full flex-col items-center gap-0 lg:flex lg:justify-center"
 >
-	<Game />
-	<div class="w-full p-0 lg:w-[19rem] z-100 lg:absolute lg:bottom-0 relative h-fit">
+	<Game bind:difficulty />
+	<div class="relative z-100 h-fit w-full p-0 lg:absolute lg:bottom-0 lg:w-[19rem]">
 		<Credits />
 	</div>
 </div>
