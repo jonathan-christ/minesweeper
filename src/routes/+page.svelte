@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { MetaTags } from 'svelte-meta-tags';
+	import clsx from 'clsx';
 	import Game from '$lib/components/Game.svelte';
+	import Credits from '$lib/components/Credits.svelte';
 	import CloudBackground from '$lib/components/CloudBackground.svelte';
 	import { MetaTags } from 'svelte-meta-tags';
 	import type { Difficulty } from '$lib/types';
@@ -40,7 +41,11 @@
 
 <CloudBackground />
 <div
-	class="relative h-full lg:h-full min-h-screen w-full flex-col items-center gap-0 lg:flex lg:justify-center"
+	id="main-container"
+	class={clsx(
+		'relative flex min-h-screen w-full flex-col items-center gap-0 overflow-hidden lg:h-full lg:justify-center',
+		difficulty === 'easy' ? 'h-screen' : 'h-full'
+	)}
 >
 	<Game bind:difficulty />
 	<div class="relative z-100 h-fit w-full p-0 lg:absolute lg:bottom-0 lg:w-[19rem]">
