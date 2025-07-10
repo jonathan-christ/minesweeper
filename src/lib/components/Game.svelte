@@ -189,7 +189,7 @@
 	</style>
 </svelte:head>
 
-<div class="flex h-fit w-full flex-col items-center lg:w-fit lg:justify-center">
+<div class="flex h-full w-full flex-col items-center lg:w-fit lg:justify-center">
 	{#if isMobile}
 		<MobileHeader
 			{flags}
@@ -213,13 +213,14 @@
 
 	<div
 		class={twMerge(
+			'justify-start',
 			clsx(classes.outer, 
 				isMobile ? (
-					currentDifficulty === 'easy' ? 'h-[90vh]' : 'h-full'
+					currentDifficulty === 'easy' ? 'h-full items-center justify-center shrink' : 'h-full pb-10'
 				) : 'h-fit',
 				'game-container py-4 lg:py-0 w-full lg:mt-0 lg:w-auto'
 			),
-			'justify-start'
+			isMobile ? 'border-y-0' : ''
 		)}
 	>
 		<div
