@@ -29,7 +29,7 @@
   src: url("/fonts/retro_computer_personal_use.ttf") format("truetype");
 }
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   --radius: 0.625rem;
